@@ -64,6 +64,7 @@
     lastRetryAction: null,
     ending: false,
     hasRenderedOnce: false,
+    settingsReturnFocusToMenu: false,
   };
 
   const $ = (selector) => document.querySelector(selector);
@@ -86,6 +87,9 @@
     localVideo: $("#local-video"),
     hostVideoMeta: $("#host-video-meta"),
     hostEmpty: $("#host-empty"),
+    sessionMenuButton: $("#session-menu-button"),
+    sessionMenu: $("#session-menu"),
+    sessionMenuClose: $("#session-menu-close"),
     hostConnectionBadge: $("#host-connection-badge"),
     viewerCount: $("#viewer-count"),
     viewerLabel: $("#viewer-label"),
@@ -164,11 +168,28 @@
       if (event.key === "Enter") openPastedInvite();
     });
 
+    elements.sessionMenuButton.addEventListener("click", () => {
+      setSessionMenu(elements.sessionMenu.hidden);
+    });
+    elements.sessionMenuClose.addEventListener("click", () => setSessionMenu(false, true));
     elements.copyLink.addEventListener("click", copyShareLink);
     elements.nativeShare.addEventListener("click", shareInvite);
-    elements.stopBroadcast.addEventListener("click", () => endBroadcast("user"));
-    elements.changeSettings.addEventListener("click", openSettingsDialog);
+    elements.stopBroadcast.addEventListener("click", () => {
+      setSessionMenu(false);
+      endBroadcast("user");
+    });
+    elements.changeSettings.addEventListener("click", () => {
+      state.settingsReturnFocusToMenu = true;
+      setSessionMenu(false);
+      openSettingsDialog();
+    });
     elements.applySettings.addEventListener("click", applyLiveSettings);
+    elements.settingsDialog.addEventListener("close", () => {
+      if (!state.settingsReturnFocusToMenu) return;
+      state.settingsReturnFocusToMenu = false;
+      if (elements.sessionMenuButton.hidden || elements.sessionMenuButton.disabled) return;
+      window.requestAnimationFrame(() => elements.sessionMenuButton.focus({ preventScroll: true }));
+    });
 
     elements.joinBroadcast.addEventListener("click", () => {
       if (elements.joinBroadcast.dataset.action === "home") {
@@ -188,6 +209,22 @@
 
     elements.privacyInfo.addEventListener("click", () => elements.privacyDialog.showModal());
 
+    document.addEventListener("pointerdown", (event) => {
+      if (elements.sessionMenu.hidden) return;
+      if (elements.sessionMenu.contains(event.target) || elements.sessionMenuButton.contains(event.target)) return;
+      setSessionMenu(false);
+    });
+    document.addEventListener("focusin", (event) => {
+      if (elements.sessionMenu.hidden) return;
+      if (elements.sessionMenu.contains(event.target) || elements.sessionMenuButton.contains(event.target)) return;
+      setSessionMenu(false);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || elements.sessionMenu.hidden) return;
+      event.preventDefault();
+      setSessionMenu(false, true);
+    });
+
     window.addEventListener("pagehide", cleanupAll);
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) resetToHome();
@@ -197,6 +234,31 @@
       const invite = parseInviteHash(window.location.hash);
       if (invite) showViewerInvite(invite);
     });
+  }
+
+  function setSessionMenu(open, restoreFocus = false) {
+    const shouldOpen = Boolean(
+      open &&
+      state.role === "host" &&
+      !state.ending &&
+      !elements.sessionMenuButton.hidden
+    );
+
+    elements.sessionMenu.hidden = !shouldOpen;
+    elements.sessionMenuButton.classList.toggle("is-open", shouldOpen);
+    elements.sessionMenuButton.setAttribute("aria-expanded", String(shouldOpen));
+    elements.sessionMenuButton.setAttribute(
+      "aria-label",
+      shouldOpen ? "Fechar controles da transmissão" : "Abrir controles da transmissão",
+    );
+
+    if (shouldOpen) {
+      window.requestAnimationFrame(() => {
+        if (!elements.sessionMenu.hidden) elements.sessionMenu.focus({ preventScroll: true });
+      });
+    } else if (restoreFocus && !elements.sessionMenuButton.hidden && !elements.sessionMenuButton.disabled) {
+      window.requestAnimationFrame(() => elements.sessionMenuButton.focus({ preventScroll: true }));
+    }
   }
 
   function activateTab(mode) {
@@ -1085,6 +1147,10 @@
   function endBroadcast(origin) {
     if (!["host", "host-starting"].includes(state.role) || state.ending) return;
     state.ending = true;
+    state.settingsReturnFocusToMenu = false;
+    setSessionMenu(false);
+    elements.sessionMenuButton.disabled = true;
+    if (elements.settingsDialog.open) elements.settingsDialog.close();
 
     state.viewers.forEach(({ connection }) => {
       try { connection.send({ type: "ended" }); } catch { /* já encerrada */ }
@@ -1181,6 +1247,8 @@
   }
 
   function showSetup() {
+    state.settingsReturnFocusToMenu = false;
+    if (elements.settingsDialog.open) elements.settingsDialog.close();
     showView("setup");
     elements.hostEmpty.hidden = true;
     elements.startBroadcast.disabled = false;
@@ -1191,6 +1259,9 @@
   }
 
   function showView(view) {
+    if (view !== "host") setSessionMenu(false);
+    elements.sessionMenuButton.hidden = view !== "host";
+    elements.sessionMenuButton.disabled = view !== "host" || state.ending;
     elements.setupView.hidden = view !== "setup";
     elements.hostView.hidden = view !== "host";
     elements.viewerView.hidden = view !== "viewer";

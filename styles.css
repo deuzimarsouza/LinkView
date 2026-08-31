@@ -149,6 +149,8 @@ button:disabled {
 }
 
 .site-header {
+  position: relative;
+  z-index: 30;
   min-height: 84px;
   display: flex;
   align-items: center;
@@ -201,6 +203,7 @@ button:disabled {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.025em;
+  white-space: nowrap;
 }
 
 .header-badge-dot {
@@ -209,6 +212,130 @@ button:disabled {
   background: var(--accent);
   border-radius: 50%;
   box-shadow: 0 0 0 4px rgba(100, 244, 207, 0.09);
+}
+
+.header-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-menu-button,
+.session-menu-close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #c8d4e2;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.session-menu-button:hover,
+.session-menu-button.is-open,
+.session-menu-close:hover {
+  color: var(--accent);
+  background: rgba(100, 244, 207, 0.09);
+  border-color: rgba(100, 244, 207, 0.3);
+}
+
+.hamburger-icon {
+  width: 18px;
+  height: 14px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.hamburger-icon span {
+  width: 100%;
+  height: 2px;
+  display: block;
+  background: currentColor;
+  border-radius: 999px;
+  transform-origin: center;
+  transition: transform 180ms ease, opacity 140ms ease;
+}
+
+.session-menu-button.is-open .hamburger-icon span:first-child {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.session-menu-button.is-open .hamburger-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.session-menu-button.is-open .hamburger-icon span:last-child {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.session-menu {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 14px);
+  right: 0;
+  width: min(390px, calc(100vw - 40px));
+  max-height: min(680px, calc(100dvh - 104px));
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--text);
+  background: rgba(10, 16, 27, 0.97);
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(18px);
+  animation: session-menu-in 180ms ease both;
+}
+
+@keyframes session-menu-in {
+  from { opacity: 0; transform: translateY(-7px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.session-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 2px 2px 4px;
+}
+
+.session-menu-head .step-label {
+  margin-bottom: 6px;
+  font-size: 8px;
+}
+
+.session-menu-head h2 {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: -0.025em;
+}
+
+.session-menu-close svg {
+  width: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.session-menu .status-card,
+.session-menu .share-card,
+.session-menu .live-settings-card {
+  background: rgba(20, 31, 48, 0.68);
+  box-shadow: none;
+}
+
+.session-menu > .danger-button {
+  width: 100%;
 }
 
 .page-shell {
@@ -954,10 +1081,7 @@ button:disabled {
 }
 
 .session-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.75fr);
-  gap: 20px;
-  align-items: start;
+  display: block;
 }
 
 .video-shell {
@@ -1034,11 +1158,6 @@ button:disabled {
 
 .video-empty svg {
   width: 34px;
-}
-
-.session-sidebar {
-  display: grid;
-  gap: 12px;
 }
 
 .status-card,
@@ -1600,18 +1719,6 @@ noscript {
     margin-top: 28px;
   }
 
-  .session-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .session-sidebar {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .status-card,
-  .share-card {
-    grid-row: span 2;
-  }
 }
 
 @media (max-width: 680px) {
@@ -1623,10 +1730,32 @@ noscript {
 
   .site-header {
     min-height: 72px;
+    gap: 10px;
   }
 
   .header-badge {
-    font-size: 9px;
+    min-height: 32px;
+    padding-inline: 9px;
+    font-size: 8px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .session-menu-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .session-menu {
+    position: fixed;
+    top: 78px;
+    right: 14px;
+    left: 14px;
+    width: auto;
+    max-height: calc(100dvh - 92px);
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 
   .page-shell {
@@ -1699,15 +1828,6 @@ noscript {
   .viewer-video-shell {
     min-height: 220px;
     border-radius: 14px;
-  }
-
-  .session-sidebar {
-    grid-template-columns: 1fr;
-  }
-
-  .status-card,
-  .share-card {
-    grid-row: auto;
   }
 
   .viewer-overlay {

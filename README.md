@@ -10,6 +10,7 @@ LinkView é um projeto estático em HTML, CSS e JavaScript para compartilhar a t
 - escolha entre 60 FPS e 30 FPS;
 - link de convite protegido por um segredo aleatório;
 - múltiplos espectadores, sem limite artificial no aplicativo, com vídeo, áudio e tela cheia;
+- menu de controles no cabeçalho durante a transmissão, com status, convite e ajuste de qualidade;
 - ajuste de qualidade sem trocar o link;
 - tratamento de permissão negada, link inválido, transmissor offline, autoplay bloqueado e ausência de áudio;
 - layout responsivo e navegação por teclado;

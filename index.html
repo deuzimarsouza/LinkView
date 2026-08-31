@@ -52,9 +52,96 @@
         </span>
         <span>LinkView</span>
       </a>
-      <div class="header-badge">
-        <span class="header-badge-dot" aria-hidden="true"></span>
-        Ponto a ponto
+      <div class="header-actions">
+        <div class="header-badge">
+          <span class="header-badge-dot" aria-hidden="true"></span>
+          Ponto a ponto
+        </div>
+        <button
+          id="session-menu-button"
+          class="session-menu-button"
+          type="button"
+          aria-label="Abrir controles da transmissão"
+          aria-controls="session-menu"
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          hidden
+        >
+          <span class="hamburger-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
+
+        <div
+          id="session-menu"
+          class="session-menu"
+          role="dialog"
+          aria-labelledby="session-menu-title"
+          tabindex="-1"
+          hidden
+        >
+          <div class="session-menu-head">
+            <div>
+              <p class="step-label">TRANSMISSÃO AO VIVO</p>
+              <h2 id="session-menu-title">Controles da sessão</h2>
+            </div>
+            <button id="session-menu-close" class="session-menu-close" type="button" aria-label="Fechar controles da transmissão">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            </button>
+          </div>
+
+          <div class="status-card">
+            <div class="status-card-head">
+              <span>Status e espectadores</span>
+              <span id="host-connection-badge" class="status-pill waiting">Preparando</span>
+            </div>
+            <div class="viewer-count">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+              <strong id="viewer-count">0</strong>
+              <span id="viewer-label">espectadores conectados</span>
+            </div>
+            <div class="audio-status">
+              <span id="audio-indicator" class="audio-indicator"></span>
+              <span id="audio-status-copy">Verificando áudio…</span>
+            </div>
+          </div>
+
+          <div class="share-card">
+            <div class="card-title-row">
+              <div>
+                <p class="step-label">CONVIDE PARA ASSISTIR</p>
+                <h2>Compartilhe o link</h2>
+              </div>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
+            </div>
+            <p>Sem limite artificial de espectadores. A capacidade real depende do upload e do dispositivo do transmissor.</p>
+            <div class="share-link-row">
+              <input id="share-link" type="text" readonly aria-label="Link da transmissão" />
+              <button id="copy-link" class="icon-button" type="button" aria-label="Copiar link">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
+              </button>
+            </div>
+            <button id="native-share" class="secondary-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
+              Enviar convite
+            </button>
+          </div>
+
+          <div class="live-settings-card">
+            <div class="live-setting-row">
+              <span>Qualidade solicitada</span>
+              <strong id="live-quality">720p</strong>
+            </div>
+            <div class="live-setting-row">
+              <span>Taxa solicitada</span>
+              <strong id="live-fps">30 FPS</strong>
+            </div>
+            <button id="change-settings" class="text-button" type="button">Mudar qualidade da transmissão</button>
+          </div>
+
+          <button id="stop-broadcast" class="danger-button" type="button">
+            <span class="stop-square" aria-hidden="true"></span>
+            Encerrar transmissão
+          </button>
+        </div>
       </div>
     </header>
 
@@ -245,61 +332,6 @@
             </div>
           </div>
 
-          <aside class="session-sidebar" aria-label="Controles da transmissão">
-            <div class="status-card">
-              <div class="status-card-head">
-                <span>Status</span>
-                <span id="host-connection-badge" class="status-pill waiting">Preparando</span>
-              </div>
-              <div class="viewer-count">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
-                <strong id="viewer-count">0</strong>
-                <span id="viewer-label">espectadores conectados</span>
-              </div>
-              <div class="audio-status">
-                <span id="audio-indicator" class="audio-indicator"></span>
-                <span id="audio-status-copy">Verificando áudio…</span>
-              </div>
-            </div>
-
-            <div class="share-card">
-              <div class="card-title-row">
-                <div>
-                  <p class="step-label">CONVIDE PARA ASSISTIR</p>
-                  <h2>Compartilhe o link</h2>
-                </div>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
-              </div>
-              <p>Sem limite artificial de espectadores. A capacidade real depende do upload e do dispositivo do transmissor.</p>
-              <div class="share-link-row">
-                <input id="share-link" type="text" readonly aria-label="Link da transmissão" />
-                <button id="copy-link" class="icon-button" type="button" aria-label="Copiar link">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
-                </button>
-              </div>
-              <button id="native-share" class="secondary-button" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
-                Enviar convite
-              </button>
-            </div>
-
-            <div class="live-settings-card">
-              <div class="live-setting-row">
-                <span>Qualidade solicitada</span>
-                <strong id="live-quality">720p</strong>
-              </div>
-              <div class="live-setting-row">
-                <span>Taxa solicitada</span>
-                <strong id="live-fps">30 FPS</strong>
-              </div>
-              <button id="change-settings" class="text-button" type="button">Ajustar qualidade</button>
-            </div>
-
-            <button id="stop-broadcast" class="danger-button" type="button">
-              <span class="stop-square" aria-hidden="true"></span>
-              Encerrar transmissão
-            </button>
-          </aside>
         </div>
       </section>
 
