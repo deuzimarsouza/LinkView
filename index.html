@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Compartilhe sua tela com áudio em tempo real por um link, direto no navegador."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="LinkView — Sua tela. Um link." />
+    <meta property="og:description" content="Compartilhe sua tela com áudio em tempo real, direto no navegador." />
+    <meta property="og:image" content="assets/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="LinkView — Sua tela. Um link." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LinkView — Sua tela. Um link." />
+    <meta name="twitter:description" content="Compartilhe sua tela com áudio em tempo real, direto no navegador." />
+    <meta name="twitter:image" content="assets/og.png" />
+    <meta name="theme-color" content="#070b12" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';"
+    />
+    <title>LinkView — Compartilhe sua tela por link</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"
+      integrity="sha512-XEKeWX+mI3Ov+tg2evDlVQFzVOIp4T8J3cNcCEPaEUGpxJV3eZaN8rHuvnFPvQpGJBHPmrozJDMpm2xcDvtmyQ=="
+      crossorigin="anonymous"
+    ></script>
+    <script defer src="config.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="LinkView — página inicial">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img">
+            <path d="M10.6 20.8 7.8 23.6a5 5 0 0 0 7.1 7.1l4.2-4.2a5 5 0 0 0 0-7.1" />
+            <path d="m21.4 11.2 2.8-2.8a5 5 0 0 0-7.1-7.1l-4.2 4.2a5 5 0 0 0 0 7.1" />
+            <path d="m11.1 20.9 9.8-9.8" />
+          </svg>
+        </span>
+        <span>LinkView</span>
+      </a>
+      <div class="header-badge">
+        <span class="header-badge-dot" aria-hidden="true"></span>
+        Ponto a ponto
+      </div>
+    </header>
+
+    <main id="main" class="page-shell" tabindex="-1">
+      <section id="setup-view" class="setup-layout" aria-labelledby="setup-title">
+        <div class="intro-panel">
+          <p class="eyebrow">SUA TELA, UM LINK</p>
+          <h1 id="setup-title" tabindex="-1">Mostre. Compartilhe. Pronto.</h1>
+          <p class="intro-copy">
+            Transmita sua tela com áudio em tempo real, sem cadastro e sem instalar nada.
+          </p>
+
+          <div class="signal-visual" aria-hidden="true">
+            <div class="signal-frame">
+              <div class="signal-topbar">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="signal-content">
+                <div class="signal-play">
+                  <svg viewBox="0 0 24 24"><path d="m9 7 8 5-8 5V7Z" /></svg>
+                </div>
+              </div>
+            </div>
+            <div class="signal-path path-one"></div>
+            <div class="signal-path path-two"></div>
+            <div class="signal-receiver receiver-one"></div>
+            <div class="signal-receiver receiver-two"></div>
+          </div>
+
+          <ul class="feature-list" aria-label="Benefícios">
+            <li>
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.2c0 4.6 3.2 8.8 7.5 9.8 4.3-1 7.5-5.2 7.5-9.8V6L12 3Z" /><path d="m9 12 2 2 4-4" /></svg>
+              </span>
+              <span><strong>Criptografado</strong><small>O vídeo vai direto entre os navegadores.</small></span>
+            </li>
+            <li>
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M8 12h8M12 8v8" /><rect x="3" y="3" width="18" height="18" rx="6" /></svg>
+              </span>
+              <span><strong>Sem cadastro</strong><small>Abra, compartilhe e comece a assistir.</small></span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="control-panel">
+          <div class="mode-tabs" role="tablist" aria-label="Escolha como usar o LinkView">
+            <button
+              id="broadcast-tab"
+              class="mode-tab is-active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="broadcast-panel"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3" /><path d="m8 21 4-3 4 3" /></svg>
+              Transmitir
+            </button>
+            <button
+              id="watch-tab"
+              class="mode-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="watch-panel"
+              tabindex="-1"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+              Assistir
+            </button>
+          </div>
+
+          <div id="broadcast-panel" class="tab-panel" role="tabpanel" aria-labelledby="broadcast-tab">
+            <div class="panel-heading">
+              <div>
+                <p class="step-label">CONFIGURE A TRANSMISSÃO</p>
+                <h2>Como você quer compartilhar?</h2>
+              </div>
+              <span class="step-count">01</span>
+            </div>
+
+            <fieldset class="option-fieldset">
+              <legend>Qualidade</legend>
+              <div class="quality-grid">
+                <label class="choice-card">
+                  <input type="radio" name="quality" value="1080" />
+                  <span class="choice-content">
+                    <strong>1080p</strong>
+                    <small>Full HD</small>
+                  </span>
+                </label>
+                <label class="choice-card is-recommended">
+                  <input type="radio" name="quality" value="720" checked />
+                  <span class="choice-content">
+                    <span class="recommendation">RECOMENDADO</span>
+                    <strong>720p</strong>
+                    <small>HD</small>
+                  </span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="quality" value="480" />
+                  <span class="choice-content">
+                    <strong>480p</strong>
+                    <small>Economia</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="option-fieldset fps-fieldset">
+              <legend>Taxa de quadros</legend>
+              <div class="fps-toggle">
+                <label>
+                  <input type="radio" name="fps" value="60" />
+                  <span><strong>60 FPS</strong><small>Movimento fluido</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="fps" value="30" checked />
+                  <span><strong>30 FPS</strong><small>Conexão estável</small></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="bandwidth-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h2v3H4v-3Zm7-5h2v8h-2v-8Zm7-8h2v16h-2V4Z" /></svg>
+              <span id="bandwidth-copy">Ideal para a maioria das conexões. Uso estimado: 2–4 Mbps por espectador.</span>
+            </div>
+
+            <button id="start-broadcast" class="primary-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3" /><path d="m8 21 4-3 4 3" /></svg>
+              <span>Compartilhar minha tela</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </button>
+
+            <p class="permission-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.2c0 4.6 3.2 8.8 7.5 9.8 4.3-1 7.5-5.2 7.5-9.8V6L12 3Z" /></svg>
+              Você escolhe qual tela, janela ou aba será exibida. Marque “Compartilhar áudio” quando o navegador oferecer essa opção.
+            </p>
+          </div>
+
+          <div id="watch-panel" class="tab-panel" role="tabpanel" aria-labelledby="watch-tab" hidden>
+            <div class="panel-heading">
+              <div>
+                <p class="step-label">ENTRE PELO CONVITE</p>
+                <h2>Cole o link da transmissão</h2>
+              </div>
+              <span class="step-count">02</span>
+            </div>
+            <p class="watch-description">Se você recebeu um link do LinkView, cole-o abaixo para abrir a transmissão.</p>
+            <label class="input-label" for="watch-link">Link da transmissão</label>
+            <div class="link-input-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" /></svg>
+              <input id="watch-link" type="url" inputmode="url" autocomplete="off" placeholder="https://…/#watch=…" aria-describedby="watch-link-error" aria-invalid="false" />
+            </div>
+            <p id="watch-link-error" class="field-error" role="alert" hidden>Esse link não parece ser uma transmissão do LinkView.</p>
+            <button id="open-broadcast" class="primary-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+              <span>Abrir transmissão</span>
+              <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </button>
+            <div class="empty-invite">
+              <div class="empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14" /></svg>
+              </div>
+              <div><strong>Ainda não tem um link?</strong><span>Peça ao transmissor para copiar o convite após iniciar o compartilhamento.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="host-view" class="session-view" aria-labelledby="host-title" hidden>
+        <div class="session-topline">
+          <div>
+            <p class="eyebrow">SUA TRANSMISSÃO</p>
+            <h1 id="host-title" tabindex="-1">Você está compartilhando</h1>
+          </div>
+          <div class="live-badge"><span aria-hidden="true"></span>AO VIVO</div>
+        </div>
+
+        <div class="session-grid">
+          <div class="video-shell">
+            <video id="local-video" autoplay muted playsinline></video>
+            <div class="video-hud top-left"><span class="live-dot"></span> AO VIVO</div>
+            <div id="host-video-meta" class="video-hud bottom-left">Preparando imagem…</div>
+            <div id="host-empty" class="video-empty" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3" /><path d="m8 21 4-3 4 3" /></svg>
+              <strong>Compartilhamento encerrado</strong>
+            </div>
+          </div>
+
+          <aside class="session-sidebar" aria-label="Controles da transmissão">
+            <div class="status-card">
+              <div class="status-card-head">
+                <span>Status</span>
+                <span id="host-connection-badge" class="status-pill waiting">Preparando</span>
+              </div>
+              <div class="viewer-count">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+                <strong id="viewer-count">0</strong>
+                <span id="viewer-label">espectadores conectados</span>
+              </div>
+              <div class="audio-status">
+                <span id="audio-indicator" class="audio-indicator"></span>
+                <span id="audio-status-copy">Verificando áudio…</span>
+              </div>
+            </div>
+
+            <div class="share-card">
+              <div class="card-title-row">
+                <div>
+                  <p class="step-label">CONVIDE PARA ASSISTIR</p>
+                  <h2>Compartilhe o link</h2>
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
+              </div>
+              <p>Quem tiver este link poderá assistir enquanto esta página estiver aberta.</p>
+              <div class="share-link-row">
+                <input id="share-link" type="text" readonly aria-label="Link da transmissão" />
+                <button id="copy-link" class="icon-button" type="button" aria-label="Copiar link">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
+                </button>
+              </div>
+              <button id="native-share" class="secondary-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
+                Enviar convite
+              </button>
+            </div>
+
+            <div class="live-settings-card">
+              <div class="live-setting-row">
+                <span>Qualidade solicitada</span>
+                <strong id="live-quality">720p</strong>
+              </div>
+              <div class="live-setting-row">
+                <span>Taxa solicitada</span>
+                <strong id="live-fps">30 FPS</strong>
+              </div>
+              <button id="change-settings" class="text-button" type="button">Ajustar qualidade</button>
+            </div>
+
+            <button id="stop-broadcast" class="danger-button" type="button">
+              <span class="stop-square" aria-hidden="true"></span>
+              Encerrar transmissão
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <section id="viewer-view" class="session-view viewer-session" aria-labelledby="viewer-title" hidden>
+        <div class="session-topline">
+          <div>
+            <p class="eyebrow">CONVITE LINKVIEW</p>
+            <h1 id="viewer-title" tabindex="-1">Transmissão compartilhada</h1>
+          </div>
+          <div id="viewer-live-badge" class="live-badge waiting"><span aria-hidden="true"></span><span id="viewer-badge-copy">AGUARDANDO</span></div>
+        </div>
+
+        <div class="viewer-stage">
+          <div class="video-shell viewer-video-shell">
+            <video id="remote-video" autoplay playsinline controls></video>
+            <div id="viewer-video-meta" class="video-hud bottom-left" hidden>Recebendo vídeo…</div>
+            <div id="viewer-overlay" class="viewer-overlay">
+              <div class="viewer-overlay-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+              </div>
+              <p class="step-label">VOCÊ FOI CONVIDADO</p>
+              <h2 id="viewer-overlay-title">Pronto para assistir?</h2>
+              <p id="viewer-overlay-copy">Entre na transmissão para receber vídeo e áudio em tempo real.</p>
+              <button id="join-broadcast" class="primary-button compact" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7 8 5-8 5V7Z" /></svg>
+                <span>Assistir agora</span>
+              </button>
+              <button id="viewer-home" class="text-button" type="button">Voltar ao início</button>
+            </div>
+            <button id="resume-playback" class="playback-fallback" type="button" hidden>Ativar vídeo e áudio</button>
+          </div>
+          <div class="viewer-info-bar">
+            <div class="connection-copy">
+              <span id="viewer-connection-dot" class="connection-dot"></span>
+              <div><strong id="viewer-status-title">Convite reconhecido</strong><span id="viewer-status-copy">Aguardando você entrar.</span></div>
+            </div>
+            <button id="viewer-fullscreen" class="secondary-button small" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" /></svg>
+              Tela cheia
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="error-view" class="error-view" aria-labelledby="error-title" hidden>
+        <div class="error-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01" /><path d="M10.3 3.7 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z" /></svg>
+        </div>
+        <p class="step-label">NÃO FOI POSSÍVEL CONTINUAR</p>
+        <h1 id="error-title" tabindex="-1">Algo interrompeu a conexão</h1>
+        <p id="error-copy">Tente novamente ou volte ao início.</p>
+        <div class="error-actions">
+          <button id="retry-action" class="primary-button compact" type="button">Tentar novamente</button>
+          <button id="error-home" class="secondary-button" type="button">Voltar ao início</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>LinkView <span aria-hidden="true">·</span> compartilhamento P2P protegido por WebRTC</p>
+      <button id="privacy-info" class="footer-button" type="button">Privacidade e limites</button>
+    </footer>
+
+    <dialog id="settings-dialog" class="app-dialog" aria-labelledby="settings-title">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="step-label">DURANTE A TRANSMISSÃO</p>
+            <h2 id="settings-title">Ajustar qualidade</h2>
+          </div>
+          <button class="dialog-close" value="cancel" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <p>O navegador tentará aplicar a nova configuração sem interromper o link.</p>
+        <div class="dialog-options">
+          <label for="dialog-quality">Qualidade</label>
+          <select id="dialog-quality">
+            <option value="1080">1080p — Full HD</option>
+            <option value="720">720p — HD</option>
+            <option value="480">480p — Economia</option>
+          </select>
+          <label for="dialog-fps">Taxa de quadros</label>
+          <select id="dialog-fps">
+            <option value="60">60 FPS — Fluido</option>
+            <option value="30">30 FPS — Estável</option>
+          </select>
+        </div>
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel">Cancelar</button>
+          <button id="apply-settings" class="primary-button compact" value="default">Aplicar ajustes</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="privacy-dialog" class="app-dialog" aria-labelledby="privacy-title">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="step-label">ANTES DE COMPARTILHAR</p>
+            <h2 id="privacy-title">Privacidade e limites</h2>
+          </div>
+          <button class="dialog-close" value="cancel" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <ul class="dialog-list">
+          <li>O conteúdo é criptografado pelo WebRTC e segue diretamente entre os participantes.</li>
+          <li>Qualquer pessoa com o link pode assistir enquanto a transmissão estiver ativa.</li>
+          <li>O serviço público de sinalização apenas aproxima os navegadores; ele não recebe o vídeo.</li>
+          <li>Esta versão aceita uma pessoa assistindo por vez; o emissor pode liberar a vaga encerrando a conexão atual.</li>
+          <li>Cada espectador usa uma nova parcela da velocidade de envio do transmissor.</li>
+        </ul>
+        <div class="dialog-actions single"><button class="primary-button compact" value="default">Entendi</button></div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+    <div id="sr-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <noscript>O LinkView precisa de JavaScript habilitado para iniciar ou assistir a uma transmissão.</noscript>
+  </body>
+</html>
