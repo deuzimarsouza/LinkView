@@ -9,7 +9,7 @@ LinkView é um projeto estático em HTML, CSS e JavaScript para compartilhar a t
 - perfis de 1080p, 720p e 480p;
 - escolha entre 60 FPS e 30 FPS;
 - link de convite protegido por um segredo aleatório;
-- um espectador por transmissão, com vídeo, áudio e tela cheia;
+- múltiplos espectadores, sem limite artificial no aplicativo, com vídeo, áudio e tela cheia;
 - ajuste de qualidade sem trocar o link;
 - tratamento de permissão negada, link inválido, transmissor offline, autoplay bloqueado e ausência de áudio;
 - layout responsivo e navegação por teclado;
@@ -75,7 +75,7 @@ O fragmento do convite não é enviado ao servidor HTTP. Assim que o espectador 
 - A mídia é P2P. Alguns firewalls empresariais e NATs simétricos exigem um servidor TURN.
 - Sem TURN em modo relay, os participantes podem descobrir os endereços IP usados na conexão P2P.
 - Credenciais TURN permanentes nunca devem ser colocadas em um repositório público. Em produção, gere credenciais temporárias por um endpoint protegido.
-- Cada espectador exige mais upload e processamento do transmissor. Por isso, a configuração padrão aceita uma pessoa. Para audiências maiores, use uma SFU e um backend dedicado.
+- O aplicativo não impõe um limite artificial de espectadores, mas a mídia é P2P: cada pessoa conectada exige uma nova parcela do upload e do processamento do transmissor. A capacidade real depende da conexão, CPU, navegador e rede. Para audiências grandes, use uma SFU ou um serviço de streaming com backend dedicado.
 - Qualquer pessoa com o link completo pode assistir enquanto a sessão estiver ativa. Trate o link como uma credencial.
 - O LinkView não grava a tela e não envia o conteúdo a um servidor de armazenamento.
 
@@ -85,7 +85,8 @@ Edite `config.js` e informe sua infraestrutura:
 
 ```js
 window.LINKVIEW_CONFIG = {
-  maxViewers: 1,
+  maxViewers: 0, // 0 = sem limite artificial; use um número positivo para limitar
+  maxPendingViewers: 16, // somente tentativas simultâneas ainda não autenticadas
   peerOptions: {
     host: "peer.exemplo.com",
     port: 443,
@@ -105,7 +106,9 @@ window.LINKVIEW_CONFIG = {
 };
 ```
 
-Se você aumentar `maxViewers`, faça testes de upload e CPU no equipamento do transmissor. Para grupos, não trate esse ajuste como substituto de uma SFU.
+O valor `maxViewers: 0` remove o limite lógico do aplicativo. Para impor um teto, use um número positivo. Mantenha `maxPendingViewers` finito: ele protege a página contra muitas tentativas de entrada simultâneas e não limita quem já está assistindo.
+
+Mesmo sem limite lógico, faça testes de upload e CPU no equipamento do transmissor. Em WebRTC P2P, cada espectador recebe uma conexão de mídia própria; portanto, este ajuste não substitui uma SFU para grandes audiências.
 
 Ao trocar o domínio de sinalização, inclua também as origens HTTPS e WSS do seu PeerServer na diretiva `connect-src` da política de segurança em `index.html`.
 

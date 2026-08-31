@@ -6,9 +6,12 @@
  * as origens HTTPS/WSS desse host ao `connect-src` em index.html.
  */
 window.LINKVIEW_CONFIG = {
-  // O MVP é pensado para uma transmissão individual. Aumente com cuidado:
-  // cada espectador consome uma nova parcela do upload do transmissor.
-  maxViewers: 1,
+  // 0 = sem limite artificial de espectadores conectados. Use um número
+  // positivo para impor um limite. A capacidade real depende do upload e CPU.
+  maxViewers: 0,
+  // Proteção contra muitas tentativas simultâneas ainda não autenticadas.
+  // Isto não limita o total de pessoas que já estão assistindo.
+  maxPendingViewers: 16,
   peerOptions: {
     debug: 1,
   },

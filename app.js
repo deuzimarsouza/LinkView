@@ -17,15 +17,25 @@
   };
 
   const DEFAULT_CONFIG = {
-    maxViewers: 1,
+    // 0 desativa o limite artificial de espectadores conectados.
+    maxViewers: 0,
+    // Limita somente conexões simultâneas que ainda não provaram possuir o convite.
+    maxPendingViewers: 16,
     peerOptions: { debug: 1 },
   };
 
   const suppliedConfig = window.LINKVIEW_CONFIG || {};
+  const requestedViewerLimit = Number(suppliedConfig.maxViewers ?? DEFAULT_CONFIG.maxViewers);
+  const requestedPendingLimit = Number(suppliedConfig.maxPendingViewers ?? DEFAULT_CONFIG.maxPendingViewers);
   const config = {
     ...DEFAULT_CONFIG,
     ...suppliedConfig,
-    maxViewers: Math.max(1, Math.min(8, Number(suppliedConfig.maxViewers) || 1)),
+    maxViewers: Number.isFinite(requestedViewerLimit) && requestedViewerLimit > 0
+      ? Math.max(1, Math.floor(requestedViewerLimit))
+      : 0,
+    maxPendingViewers: Number.isFinite(requestedPendingLimit) && requestedPendingLimit > 0
+      ? Math.max(4, Math.min(64, Math.floor(requestedPendingLimit)))
+      : DEFAULT_CONFIG.maxPendingViewers,
     peerOptions: {
       ...DEFAULT_CONFIG.peerOptions,
       ...(suppliedConfig.peerOptions || {}),
@@ -461,7 +471,7 @@
       !state.localStream?.active ||
       connection.metadata?.app !== "LinkView" ||
       connection.metadata?.role !== "viewer" ||
-      state.pendingViewers.size >= Math.max(2, config.maxViewers * 2)
+      state.pendingViewers.size >= config.maxPendingViewers
     ) {
       try { connection.close(); } catch { /* conexão ainda não utilizável */ }
       return;
@@ -498,7 +508,7 @@
         return;
       }
 
-      if (state.viewers.size >= config.maxViewers) {
+      if (config.maxViewers > 0 && state.viewers.size >= config.maxViewers) {
         rejectTerminal("full");
         return;
       }
@@ -569,7 +579,7 @@
     call.on("close", () => removeViewer(connection.peer, viewer));
     call.on("error", () => removeViewer(connection.peer, viewer));
     updateViewerCount();
-    announce(`${state.viewers.size} espectador conectado.`);
+    announce(`${state.viewers.size} ${state.viewers.size === 1 ? "espectador conectado" : "espectadores conectados"}.`);
     return viewer;
   }
 
@@ -874,7 +884,7 @@
 
     if (payload.type === "rejected") {
       const messages = {
-        full: "Esta transmissão já está sendo assistida por outra pessoa.",
+        full: "Esta transmissão atingiu o limite de espectadores configurado pelo transmissor.",
         busy: "O transmissor está recebendo muitas tentativas de conexão. Tente novamente em instantes.",
         duplicate: "Este navegador já está conectado à transmissão.",
         ended: "A transmissão já foi encerrada.",
