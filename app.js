@@ -6,6 +6,8 @@
     720: { width: 1280, height: 720, label: "720p" },
     480: { width: 854, height: 480, label: "480p" },
   };
+  const ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const ROOM_CODE_LENGTH = 4;
 
   const BANDWIDTH_COPY = {
     "1080-60": "Mais nitidez e fluidez. Recomendamos 8–12 Mbps de upload por espectador.",
@@ -48,6 +50,7 @@
     localStream: null,
     remoteStream: null,
     roomToken: "",
+    roomCode: "",
     hostId: "",
     shareUrl: "",
     profile: { quality: "720", fps: 30 },
@@ -64,7 +67,7 @@
     lastRetryAction: null,
     ending: false,
     hasRenderedOnce: false,
-    settingsReturnFocusToMenu: false,
+    settingsReturnFocusTo: null,
   };
 
   const $ = (selector) => document.querySelector(selector);
@@ -84,17 +87,22 @@
     watchLink: $("#watch-link"),
     watchLinkError: $("#watch-link-error"),
     openBroadcast: $("#open-broadcast"),
+    watchCode: $("#watch-code"),
+    watchCodeError: $("#watch-code-error"),
+    openCodeBroadcast: $("#open-code-broadcast"),
     localVideo: $("#local-video"),
     hostVideoMeta: $("#host-video-meta"),
     hostEmpty: $("#host-empty"),
+    settingsMenuButton: $("#settings-menu-button"),
+    liveSettingsMenu: $("#live-settings-menu"),
+    settingsMenuClose: $("#settings-menu-close"),
     sessionMenuButton: $("#session-menu-button"),
     sessionMenu: $("#session-menu"),
     sessionMenuClose: $("#session-menu-close"),
-    hostConnectionBadge: $("#host-connection-badge"),
+    hostViewerCount: $("#host-viewer-count"),
     viewerCount: $("#viewer-count"),
-    viewerLabel: $("#viewer-label"),
-    audioIndicator: $("#audio-indicator"),
-    audioStatusCopy: $("#audio-status-copy"),
+    roomCode: $("#room-code"),
+    copyRoomCode: $("#copy-room-code"),
     shareLink: $("#share-link"),
     copyLink: $("#copy-link"),
     nativeShare: $("#native-share"),
@@ -160,6 +168,7 @@
 
     elements.startBroadcast.addEventListener("click", startBroadcast);
     elements.openBroadcast.addEventListener("click", openPastedInvite);
+    elements.openCodeBroadcast.addEventListener("click", openCodeInvite);
     elements.watchLink.addEventListener("input", () => {
       elements.watchLinkError.hidden = true;
       elements.watchLink.setAttribute("aria-invalid", "false");
@@ -167,28 +176,43 @@
     elements.watchLink.addEventListener("keydown", (event) => {
       if (event.key === "Enter") openPastedInvite();
     });
+    elements.watchCode.addEventListener("input", () => {
+      const normalizedCode = normalizeRoomCode(elements.watchCode.value).slice(0, ROOM_CODE_LENGTH);
+      if (elements.watchCode.value !== normalizedCode) elements.watchCode.value = normalizedCode;
+      elements.watchCodeError.hidden = true;
+      elements.watchCode.setAttribute("aria-invalid", "false");
+    });
+    elements.watchCode.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") openCodeInvite();
+    });
 
+    elements.settingsMenuButton.addEventListener("click", () => {
+      setLiveSettingsMenu(elements.liveSettingsMenu.hidden);
+    });
+    elements.settingsMenuClose.addEventListener("click", () => setLiveSettingsMenu(false, true));
     elements.sessionMenuButton.addEventListener("click", () => {
       setSessionMenu(elements.sessionMenu.hidden);
     });
     elements.sessionMenuClose.addEventListener("click", () => setSessionMenu(false, true));
+    elements.copyRoomCode.addEventListener("click", copyRoomCode);
     elements.copyLink.addEventListener("click", copyShareLink);
     elements.nativeShare.addEventListener("click", shareInvite);
-    elements.stopBroadcast.addEventListener("click", () => {
-      setSessionMenu(false);
-      endBroadcast("user");
-    });
+    elements.stopBroadcast.addEventListener("click", () => endBroadcast("user"));
     elements.changeSettings.addEventListener("click", () => {
-      state.settingsReturnFocusToMenu = true;
-      setSessionMenu(false);
+      state.settingsReturnFocusTo = "settings-menu";
+      setLiveSettingsMenu(false);
       openSettingsDialog();
     });
     elements.applySettings.addEventListener("click", applyLiveSettings);
     elements.settingsDialog.addEventListener("close", () => {
-      if (!state.settingsReturnFocusToMenu) return;
-      state.settingsReturnFocusToMenu = false;
-      if (elements.sessionMenuButton.hidden || elements.sessionMenuButton.disabled) return;
-      window.requestAnimationFrame(() => elements.sessionMenuButton.focus({ preventScroll: true }));
+      if (!state.settingsReturnFocusTo) return;
+      const returnTarget = state.settingsReturnFocusTo;
+      state.settingsReturnFocusTo = null;
+      const target = returnTarget === "settings-menu"
+        ? elements.settingsMenuButton
+        : elements.sessionMenuButton;
+      if (target.hidden || target.disabled) return;
+      window.requestAnimationFrame(() => target.focus({ preventScroll: true }));
     });
 
     elements.joinBroadcast.addEventListener("click", () => {
@@ -210,17 +234,35 @@
     elements.privacyInfo.addEventListener("click", () => elements.privacyDialog.showModal());
 
     document.addEventListener("pointerdown", (event) => {
-      if (elements.sessionMenu.hidden) return;
-      if (elements.sessionMenu.contains(event.target) || elements.sessionMenuButton.contains(event.target)) return;
+      if (elements.sessionMenu.hidden && elements.liveSettingsMenu.hidden) return;
+      if (
+        elements.sessionMenu.contains(event.target) ||
+        elements.sessionMenuButton.contains(event.target) ||
+        elements.liveSettingsMenu.contains(event.target) ||
+        elements.settingsMenuButton.contains(event.target)
+      ) return;
       setSessionMenu(false);
+      setLiveSettingsMenu(false);
     });
     document.addEventListener("focusin", (event) => {
-      if (elements.sessionMenu.hidden) return;
-      if (elements.sessionMenu.contains(event.target) || elements.sessionMenuButton.contains(event.target)) return;
+      if (elements.sessionMenu.hidden && elements.liveSettingsMenu.hidden) return;
+      if (
+        elements.sessionMenu.contains(event.target) ||
+        elements.sessionMenuButton.contains(event.target) ||
+        elements.liveSettingsMenu.contains(event.target) ||
+        elements.settingsMenuButton.contains(event.target)
+      ) return;
       setSessionMenu(false);
+      setLiveSettingsMenu(false);
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape" || elements.sessionMenu.hidden) return;
+      if (event.key !== "Escape") return;
+      if (!elements.liveSettingsMenu.hidden) {
+        event.preventDefault();
+        setLiveSettingsMenu(false, true);
+        return;
+      }
+      if (elements.sessionMenu.hidden) return;
       event.preventDefault();
       setSessionMenu(false, true);
     });
@@ -244,6 +286,8 @@
       !elements.sessionMenuButton.hidden
     );
 
+    if (shouldOpen) setLiveSettingsMenu(false);
+
     elements.sessionMenu.hidden = !shouldOpen;
     elements.sessionMenuButton.classList.toggle("is-open", shouldOpen);
     elements.sessionMenuButton.setAttribute("aria-expanded", String(shouldOpen));
@@ -258,6 +302,33 @@
       });
     } else if (restoreFocus && !elements.sessionMenuButton.hidden && !elements.sessionMenuButton.disabled) {
       window.requestAnimationFrame(() => elements.sessionMenuButton.focus({ preventScroll: true }));
+    }
+  }
+
+  function setLiveSettingsMenu(open, restoreFocus = false) {
+    const shouldOpen = Boolean(
+      open &&
+      state.role === "host" &&
+      !state.ending &&
+      !elements.settingsMenuButton.hidden
+    );
+
+    if (shouldOpen) setSessionMenu(false);
+
+    elements.liveSettingsMenu.hidden = !shouldOpen;
+    elements.settingsMenuButton.classList.toggle("is-open", shouldOpen);
+    elements.settingsMenuButton.setAttribute("aria-expanded", String(shouldOpen));
+    elements.settingsMenuButton.setAttribute(
+      "aria-label",
+      shouldOpen ? "Fechar configurações da transmissão" : "Abrir configurações da transmissão",
+    );
+
+    if (shouldOpen) {
+      window.requestAnimationFrame(() => {
+        if (!elements.liveSettingsMenu.hidden) elements.liveSettingsMenu.focus({ preventScroll: true });
+      });
+    } else if (restoreFocus && !elements.settingsMenuButton.hidden && !elements.settingsMenuButton.disabled) {
+      window.requestAnimationFrame(() => elements.settingsMenuButton.focus({ preventScroll: true }));
     }
   }
 
@@ -357,8 +428,8 @@
         if (hostGeneration === state.hostGeneration && state.role === "host") updateAudioStatus();
       });
 
-      announce("Tela selecionada. Criando o link da transmissão.");
-      const peer = await createPeer("host", hostGeneration);
+      announce("Tela selecionada. Criando o código e o link da transmissão.");
+      const { peer, code } = await createHostPeer(hostGeneration);
       if (
         hostGeneration !== state.hostGeneration ||
         state.ending ||
@@ -377,6 +448,7 @@
       state.peer = peer;
       state.hostId = peer.id;
       state.roomToken = createSecret();
+      state.roomCode = code;
       state.shareUrl = buildShareUrl(state.hostId, state.roomToken);
       state.role = "host";
 
@@ -394,6 +466,7 @@
       elements.localVideo.srcObject = stream;
       await elements.localVideo.play().catch(() => undefined);
       if (!isCurrentHostSession(hostGeneration, peer)) return;
+      elements.roomCode.value = state.roomCode;
       elements.shareLink.value = state.shareUrl;
       elements.liveQuality.textContent = PROFILES[state.profile.quality].label;
       elements.liveFps.textContent = `${state.profile.fps} FPS`;
@@ -402,8 +475,8 @@
       updateViewerCount();
       showView("host");
       startHostMetrics();
-      announce("Transmissão iniciada. O link está pronto para ser compartilhado.");
-      showToast("Link criado. Compartilhe com quem vai assistir.");
+      announce("Transmissão iniciada. O código e o link estão prontos para compartilhar.");
+      showToast(`Transmissão pronta. Código: ${state.roomCode}.`);
     } catch (error) {
       if (hostGeneration !== state.hostGeneration) return;
       const cancelled = captureStarted && (
@@ -445,6 +518,15 @@
       return;
     }
 
+    if (error?.type === "unavailable-id" || error?.message === "room-code-unavailable") {
+      showFatalError(
+        "Não foi possível reservar um código",
+        "Tente iniciar novamente para gerar outro código de transmissão.",
+        startBroadcast,
+      );
+      return;
+    }
+
     showFatalError(
       "Não foi possível iniciar a transmissão",
       "Confira sua conexão, permita o compartilhamento de tela e tente de novo.",
@@ -452,13 +534,30 @@
     );
   }
 
-  function createPeer(role, generation = 0) {
+  async function createHostPeer(generation) {
+    let lastError = null;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const code = createRoomCode();
+      try {
+        const peer = await createPeer("host", generation, code);
+        return { peer, code };
+      } catch (error) {
+        lastError = error;
+        if (error?.type !== "unavailable-id") throw error;
+      }
+    }
+    throw lastError || new Error("room-code-unavailable");
+  }
+
+  function createPeer(role, generation = 0, requestedId = "") {
     return new Promise((resolve, reject) => {
       let opened = false;
       let peer;
 
       try {
-        peer = new window.Peer(config.peerOptions);
+        peer = requestedId
+          ? new window.Peer(requestedId, config.peerOptions)
+          : new window.Peer(config.peerOptions);
       } catch (error) {
         reject(error);
         return;
@@ -506,8 +605,6 @@
 
     if (isCurrentHostSession(generation, peer) && !state.ending) {
       showToast("Houve uma instabilidade na conexão. A transmissão da tela continua aberta.", true);
-      elements.hostConnectionBadge.textContent = "Instável";
-      elements.hostConnectionBadge.classList.add("waiting");
     }
   }
 
@@ -517,8 +614,7 @@
 
   function handleHostSignalingDisconnected(generation, peer) {
     if (!isCurrentHostSession(generation, peer) || state.ending || peer.destroyed) return;
-    elements.hostConnectionBadge.textContent = "Reconectando";
-    elements.hostConnectionBadge.classList.add("waiting");
+    showToast("Reconectando o convite da transmissão…", true);
 
     try {
       peer.reconnect();
@@ -560,7 +656,9 @@
         rejectTerminal("ended");
         return;
       }
-      if (!payload || payload.type !== "watch" || !safeTokenEqual(payload.token, state.roomToken)) {
+      const authorizedByLink = payload?.access !== "code" && safeTokenEqual(payload?.token, state.roomToken);
+      const authorizedByCode = payload?.access === "code" && safeTokenEqual(payload?.token, state.roomCode);
+      if (payload?.type !== "watch" || (!authorizedByLink && !authorizedByCode)) {
         rejectTerminal("invalid");
         return;
       }
@@ -660,20 +758,15 @@
   function updateViewerCount() {
     const count = state.viewers.size;
     elements.viewerCount.textContent = String(count);
-    elements.viewerLabel.textContent = count === 1 ? "espectador conectado" : "espectadores conectados";
-    elements.hostConnectionBadge.classList.toggle("waiting", count === 0);
-    elements.hostConnectionBadge.textContent = count === 0 ? "Aguardando" : "Conectado";
+    elements.hostViewerCount.setAttribute(
+      "aria-label",
+      `${count} ${count === 1 ? "espectador" : "espectadores"} assistindo`,
+    );
   }
 
   function updateAudioStatus() {
     const audioTrack = state.localStream?.getAudioTracks()[0];
     const hasAudio = audioTrack?.readyState === "live";
-    elements.audioIndicator.classList.toggle("is-active", hasAudio);
-    elements.audioIndicator.classList.toggle("is-warning", !hasAudio);
-    elements.audioStatusCopy.textContent = hasAudio
-      ? "Áudio da tela incluído"
-      : "Sem áudio — reinicie e marque “Compartilhar áudio”";
-
     if (!hasAudio) {
       showToast("A tela foi compartilhada sem áudio. Para incluí-lo, reinicie e marque “Compartilhar áudio”.", true);
     }
@@ -708,12 +801,26 @@
     announce("Link da transmissão copiado.");
   }
 
+  async function copyRoomCode() {
+    if (!state.roomCode) return;
+    try {
+      await navigator.clipboard.writeText(state.roomCode);
+    } catch {
+      elements.roomCode.focus();
+      elements.roomCode.select();
+      document.execCommand("copy");
+      elements.roomCode.setSelectionRange(0, 0);
+    }
+    showToast("Código copiado.");
+    announce("Código da transmissão copiado.");
+  }
+
   async function shareInvite() {
     if (!navigator.share || !state.shareUrl) return;
     try {
       await navigator.share({
         title: "Assista à minha tela no LinkView",
-        text: "Abra este link para assistir à minha transmissão ao vivo:",
+        text: `Código para entrar: ${state.roomCode}\n\nOu abra este link para assistir à minha transmissão ao vivo:`,
         url: state.shareUrl,
       });
     } catch (error) {
@@ -799,20 +906,39 @@
     showViewerInvite(invite);
   }
 
+  function openCodeInvite() {
+    const code = normalizeRoomCode(elements.watchCode.value);
+    if (!isValidRoomCode(code)) {
+      elements.watchCodeError.hidden = false;
+      elements.watchCode.setAttribute("aria-invalid", "true");
+      elements.watchCode.focus();
+      return;
+    }
+
+    elements.watchCode.value = code;
+    elements.watchCodeError.hidden = true;
+    elements.watchCode.setAttribute("aria-invalid", "false");
+    showViewerInvite({ hostId: code, token: code, access: "code" });
+    void joinBroadcast();
+  }
+
   function showViewerInvite(invite) {
     cleanupViewerResources(false);
     state.pendingInvite = invite;
     state.role = "invite";
     elements.viewerOverlay.hidden = false;
-    elements.viewerOverlayTitle.textContent = "Pronto para assistir?";
-    elements.viewerOverlayCopy.textContent = "Entre na transmissão para receber vídeo e áudio em tempo real.";
+    const enteredByCode = invite.access === "code";
+    elements.viewerOverlayTitle.textContent = enteredByCode ? "Código aceito" : "Pronto para assistir?";
+    elements.viewerOverlayCopy.textContent = enteredByCode
+      ? "Código reconhecido. Entre para receber vídeo e áudio em tempo real."
+      : "Entre na transmissão para receber vídeo e áudio em tempo real.";
     elements.joinBroadcast.dataset.action = "join";
     elements.joinBroadcast.querySelector("span").textContent = "Assistir agora";
     elements.joinBroadcast.disabled = false;
     elements.viewerHome.hidden = false;
     elements.viewerVideoMeta.hidden = true;
     elements.resumePlayback.hidden = true;
-    setViewerStatus("Convite reconhecido", "Aguardando você entrar.", "waiting");
+    setViewerStatus(enteredByCode ? "Código reconhecido" : "Convite reconhecido", "Aguardando você entrar.", "waiting");
     setViewerLiveState(false, "AGUARDANDO");
     showView("viewer");
   }
@@ -875,7 +1001,7 @@
           connection.close();
           return;
         }
-        connection.send({ type: "watch", token: invite.token });
+        connection.send({ type: "watch", token: invite.token, access: invite.access || "link" });
         setViewerStatus("Convite enviado", "Aguardando o vídeo do transmissor.", "waiting");
       });
 
@@ -1147,17 +1273,18 @@
   function endBroadcast(origin) {
     if (!["host", "host-starting"].includes(state.role) || state.ending) return;
     state.ending = true;
-    state.settingsReturnFocusToMenu = false;
+    state.settingsReturnFocusTo = null;
     setSessionMenu(false);
+    setLiveSettingsMenu(false);
     elements.sessionMenuButton.disabled = true;
+    elements.settingsMenuButton.disabled = true;
+    elements.stopBroadcast.disabled = true;
     if (elements.settingsDialog.open) elements.settingsDialog.close();
 
     state.viewers.forEach(({ connection }) => {
       try { connection.send({ type: "ended" }); } catch { /* já encerrada */ }
     });
 
-    elements.hostConnectionBadge.textContent = "Encerrada";
-    elements.hostConnectionBadge.classList.add("waiting");
     elements.hostEmpty.hidden = false;
     // Interrompe a mídia imediatamente e dá um instante para a mensagem final
     // atravessar o canal de dados antes de fechar toda a sessão.
@@ -1195,7 +1322,10 @@
     state.peer = null;
     state.hostId = "";
     state.roomToken = "";
+    state.roomCode = "";
     state.shareUrl = "";
+    elements.roomCode.value = "----";
+    elements.shareLink.value = "";
   }
 
   function cleanupViewerResources(preserveInvite) {
@@ -1247,21 +1377,30 @@
   }
 
   function showSetup() {
-    state.settingsReturnFocusToMenu = false;
+    state.settingsReturnFocusTo = null;
     if (elements.settingsDialog.open) elements.settingsDialog.close();
     showView("setup");
     elements.hostEmpty.hidden = true;
     elements.startBroadcast.disabled = false;
     elements.startBroadcast.innerHTML = `${screenIcon()}<span>Compartilhar minha tela</span>${arrowIcon()}`;
+    elements.watchCode.value = "";
+    elements.watchCodeError.hidden = true;
+    elements.watchCode.setAttribute("aria-invalid", "false");
     elements.watchLink.value = "";
     elements.watchLinkError.hidden = true;
     elements.watchLink.setAttribute("aria-invalid", "false");
   }
 
   function showView(view) {
-    if (view !== "host") setSessionMenu(false);
+    if (view !== "host") {
+      setSessionMenu(false);
+      setLiveSettingsMenu(false);
+    }
+    elements.settingsMenuButton.hidden = view !== "host";
+    elements.settingsMenuButton.disabled = view !== "host" || state.ending;
     elements.sessionMenuButton.hidden = view !== "host";
     elements.sessionMenuButton.disabled = view !== "host" || state.ending;
+    elements.stopBroadcast.disabled = view !== "host" || state.ending;
     elements.setupView.hidden = view !== "setup";
     elements.hostView.hidden = view !== "host";
     elements.viewerView.hidden = view !== "viewer";
@@ -1343,6 +1482,22 @@
     return [...bytes].map((value) => value.toString(16).padStart(2, "0")).join("");
   }
 
+  function createRoomCode() {
+    const bytes = new Uint8Array(ROOM_CODE_LENGTH);
+    crypto.getRandomValues(bytes);
+    return [...bytes]
+      .map((value) => ROOM_CODE_ALPHABET[value % ROOM_CODE_ALPHABET.length])
+      .join("");
+  }
+
+  function normalizeRoomCode(value) {
+    return String(value || "").toUpperCase().replace(/[\s-]/g, "");
+  }
+
+  function isValidRoomCode(value) {
+    return new RegExp(`^[${ROOM_CODE_ALPHABET}]{${ROOM_CODE_LENGTH}}$`).test(value);
+  }
+
   function safeTokenEqual(candidate, expected) {
     if (typeof candidate !== "string" || typeof expected !== "string" || candidate.length !== expected.length) return false;
     let difference = 0;
@@ -1369,7 +1524,7 @@
       const hostId = invite.slice(0, separatorIndex);
       const token = invite.slice(separatorIndex + 1);
       if (!/^[A-Za-z0-9_-]{1,128}$/.test(hostId) || !/^[a-f0-9]{32}$/.test(token)) return null;
-      return { hostId, token };
+      return { hostId, token, access: "link" };
     } catch {
       return null;
     }

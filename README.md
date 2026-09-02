@@ -8,7 +8,7 @@ LinkView é um projeto estático em HTML, CSS e JavaScript para compartilhar a t
 - áudio da tela quando o navegador oferece essa opção;
 - perfis de 1080p, 720p e 480p;
 - escolha entre 60 FPS e 30 FPS;
-- link de convite protegido por um segredo aleatório;
+- código curto de 4 caracteres para entrada rápida, além de link de convite protegido por um segredo aleatório;
 - múltiplos espectadores, sem limite artificial no aplicativo, com vídeo, áudio e tela cheia;
 - menu de controles no cabeçalho durante a transmissão, com status, convite e ajuste de qualidade;
 - ajuste de qualidade sem trocar o link;
@@ -29,8 +29,8 @@ Depois, abra `http://localhost:4173`.
 1. Em um computador, escolha a resolução e a taxa de quadros.
 2. Clique em **Compartilhar minha tela**.
 3. Se quiser transmitir áudio, marque **Compartilhar áudio** no seletor do navegador.
-4. Copie o link exibido.
-5. Abra o link em outro navegador ou aparelho e clique em **Assistir agora**.
+4. Copie o código exibido ou o link completo.
+5. No outro navegador ou aparelho, digite o código na aba **Assistir** e clique em **Abrir com código** para conectar imediatamente, ou abra o link e clique em **Assistir agora**.
 
 ## Publicar no GitHub Pages
 
@@ -62,9 +62,9 @@ O navegador pode entregar uma resolução ou taxa de quadros menor do que a soli
 O GitHub Pages hospeda somente os arquivos do aplicativo. Para os navegadores se encontrarem, o projeto usa o PeerJS 1.5.5 e, por padrão, o PeerServer Cloud público como sinalização.
 
 1. O transmissor captura a tela com `getDisplayMedia()`.
-2. O PeerJS gera um identificador temporário.
-3. O LinkView cria um segredo aleatório de 128 bits e coloca ID + segredo no fragmento do link.
-4. Quem assiste abre primeiro um canal WebRTC de dados e apresenta o segredo.
+2. O LinkView reserva um identificador temporário de 4 caracteres no PeerJS e o exibe como código da transmissão.
+3. O LinkView também cria um segredo aleatório de 128 bits e coloca ID + segredo no fragmento do link completo.
+4. Quem assiste abre primeiro um canal WebRTC de dados e apresenta o código ou o segredo do link.
 5. Somente após a validação o transmissor inicia a chamada de mídia unidirecional.
 6. O vídeo e o áudio usam a criptografia obrigatória do WebRTC e não passam pelo GitHub Pages.
 
@@ -78,6 +78,7 @@ O fragmento do convite não é enviado ao servidor HTTP. Assim que o espectador 
 - Credenciais TURN permanentes nunca devem ser colocadas em um repositório público. Em produção, gere credenciais temporárias por um endpoint protegido.
 - O aplicativo não impõe um limite artificial de espectadores, mas a mídia é P2P: cada pessoa conectada exige uma nova parcela do upload e do processamento do transmissor. A capacidade real depende da conexão, CPU, navegador e rede. Para audiências grandes, use uma SFU ou um serviço de streaming com backend dedicado.
 - Qualquer pessoa com o link completo pode assistir enquanto a sessão estiver ativa. Trate o link como uma credencial.
+- O código de 4 caracteres é um atalho de entrada, não uma senha forte. Há cerca de um milhão de combinações possíveis; para conteúdo sensível, compartilhe o link completo e apenas com pessoas de confiança.
 - O LinkView não grava a tela e não envia o conteúdo a um servidor de armazenamento.
 
 ## Usar um PeerServer próprio

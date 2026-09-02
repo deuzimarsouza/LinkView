@@ -53,10 +53,22 @@
         <span>LinkView</span>
       </a>
       <div class="header-actions">
-        <div class="header-badge">
+        <div class="header-badge" aria-label="Ponto a ponto">
           <span class="header-badge-dot" aria-hidden="true"></span>
-          Ponto a ponto
+          <span class="header-badge-copy">Ponto a ponto</span>
         </div>
+        <button
+          id="settings-menu-button"
+          class="settings-menu-button"
+          type="button"
+          aria-label="Abrir configurações da transmissão"
+          aria-controls="live-settings-menu"
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          hidden
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" /><path d="m19.4 13.7 1.1.9-1.7 3-1.3-.5a7.7 7.7 0 0 1-1.7 1l-.2 1.4h-3.4l-.2-1.4a7.7 7.7 0 0 1-1.7-1l-1.3.5-1.7-3 1.1-.9a7.4 7.4 0 0 1 0-1.9l-1.1-.9 1.7-3 1.3.5a7.7 7.7 0 0 1 1.7-1l.2-1.4h3.4l.2 1.4a7.7 7.7 0 0 1 1.7 1l1.3-.5 1.7 3-1.1.9a7.4 7.4 0 0 1 0 1.9Z" /></svg>
+        </button>
         <button
           id="session-menu-button"
           class="session-menu-button"
@@ -88,40 +100,58 @@
             </button>
           </div>
 
-          <div class="status-card">
-            <div class="status-card-head">
-              <span>Status e espectadores</span>
-              <span id="host-connection-badge" class="status-pill waiting">Preparando</span>
+          <div class="room-code-card">
+            <div class="card-title-row">
+              <div>
+                <p class="step-label">ENTRE COM CÓDIGO</p>
+                <h2>Envie este código</h2>
+              </div>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M8 16h8" /></svg>
             </div>
-            <div class="viewer-count">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
-              <strong id="viewer-count">0</strong>
-              <span id="viewer-label">espectadores conectados</span>
-            </div>
-            <div class="audio-status">
-              <span id="audio-indicator" class="audio-indicator"></span>
-              <span id="audio-status-copy">Verificando áudio…</span>
+            <div class="room-code-row">
+              <input id="room-code" type="text" value="----" readonly aria-label="Código da transmissão" />
+              <button id="copy-room-code" class="icon-button" type="button" aria-label="Copiar código da transmissão">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
+              </button>
             </div>
           </div>
 
           <div class="share-card">
             <div class="card-title-row">
               <div>
-                <p class="step-label">CONVIDE PARA ASSISTIR</p>
+                <p class="step-label">OU COMPARTILHE O LINK</p>
                 <h2>Compartilhe o link</h2>
               </div>
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
             </div>
-            <p>Sem limite artificial de espectadores. A capacidade real depende do upload e do dispositivo do transmissor.</p>
             <div class="share-link-row">
               <input id="share-link" type="text" readonly aria-label="Link da transmissão" />
               <button id="copy-link" class="icon-button" type="button" aria-label="Copiar link">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
               </button>
+              <button id="native-share" class="icon-button native-share-button" type="button" aria-label="Enviar convite" title="Enviar convite">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
+              </button>
             </div>
-            <button id="native-share" class="secondary-button" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" /></svg>
-              Enviar convite
+          </div>
+
+        </div>
+
+        <div
+          id="live-settings-menu"
+          class="live-settings-menu"
+          role="dialog"
+          aria-labelledby="live-settings-menu-title"
+          tabindex="-1"
+          hidden
+        >
+          <div class="session-menu-head">
+            <div>
+              <p class="step-label">TRANSMISSÃO AO VIVO</p>
+              <h2 id="live-settings-menu-title">Configurações</h2>
+            </div>
+            <button id="settings-menu-close" class="settings-menu-close" type="button" aria-label="Fechar configurações da transmissão">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
             </button>
           </div>
 
@@ -136,11 +166,6 @@
             </div>
             <button id="change-settings" class="text-button" type="button">Mudar qualidade da transmissão</button>
           </div>
-
-          <button id="stop-broadcast" class="danger-button" type="button">
-            <span class="stop-square" aria-hidden="true"></span>
-            Encerrar transmissão
-          </button>
         </div>
       </div>
     </header>
@@ -286,27 +311,45 @@
             <div class="panel-heading">
               <div>
                 <p class="step-label">ENTRE PELO CONVITE</p>
-                <h2>Cole o link da transmissão</h2>
+                <h2>Digite o código ou cole o link</h2>
               </div>
               <span class="step-count">02</span>
             </div>
-            <p class="watch-description">Se você recebeu um link do LinkView, cole-o abaixo para abrir a transmissão.</p>
-            <label class="input-label" for="watch-link">Link da transmissão</label>
-            <div class="link-input-wrap">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" /></svg>
-              <input id="watch-link" type="url" inputmode="url" autocomplete="off" placeholder="https://…/#watch=…" aria-describedby="watch-link-error" aria-invalid="false" />
+            <p class="watch-description">Recebeu um código de 4 caracteres? Digite-o abaixo para abrir a transmissão. Se preferir, você também pode usar o link completo.</p>
+            <div class="invite-entry invite-entry-code">
+              <label class="input-label" for="watch-code">Código da transmissão</label>
+              <div class="code-input-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M8 16h8" /></svg>
+                <input id="watch-code" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="7" placeholder="XVHG" aria-describedby="watch-code-error" aria-invalid="false" />
+              </div>
+              <p id="watch-code-error" class="field-error" role="alert" hidden>Digite os 4 caracteres do código recebido.</p>
+              <button id="open-code-broadcast" class="primary-button compact" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+                <span>Abrir com código</span>
+                <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+              </button>
             </div>
-            <p id="watch-link-error" class="field-error" role="alert" hidden>Esse link não parece ser uma transmissão do LinkView.</p>
-            <button id="open-broadcast" class="primary-button" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
-              <span>Abrir transmissão</span>
-              <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
-            </button>
+
+            <div class="invite-divider" aria-hidden="true"><span>ou</span></div>
+
+            <div class="invite-entry">
+              <label class="input-label" for="watch-link">Link da transmissão</label>
+              <div class="link-input-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" /></svg>
+                <input id="watch-link" type="url" inputmode="url" autocomplete="off" placeholder="https://…/#watch=…" aria-describedby="watch-link-error" aria-invalid="false" />
+              </div>
+              <p id="watch-link-error" class="field-error" role="alert" hidden>Esse link não parece ser uma transmissão do LinkView.</p>
+              <button id="open-broadcast" class="primary-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+                <span>Abrir transmissão</span>
+                <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+              </button>
+            </div>
             <div class="empty-invite">
               <div class="empty-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14" /></svg>
               </div>
-              <div><strong>Ainda não tem um link?</strong><span>Peça ao transmissor para copiar o convite após iniciar o compartilhamento.</span></div>
+              <div><strong>Ainda não tem um convite?</strong><span>Peça ao transmissor o código de 4 caracteres ou o link completo após iniciar o compartilhamento.</span></div>
             </div>
           </div>
         </div>
@@ -318,7 +361,18 @@
             <p class="eyebrow">SUA TRANSMISSÃO</p>
             <h1 id="host-title" tabindex="-1">Você está compartilhando</h1>
           </div>
-          <div class="live-badge"><span aria-hidden="true"></span>AO VIVO</div>
+          <div class="host-live-summary">
+            <div class="live-badge"><span aria-hidden="true"></span>AO VIVO</div>
+            <button id="stop-broadcast" class="danger-button host-stop-button" type="button">
+              <span class="stop-square" aria-hidden="true"></span>
+              Encerrar transmissão
+            </button>
+            <div id="host-viewer-count" class="host-viewer-count" aria-label="0 espectadores assistindo">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+              <strong id="viewer-count">0</strong>
+              <span>assistindo</span>
+            </div>
+          </div>
         </div>
 
         <div class="session-grid">
@@ -440,7 +494,8 @@
         </div>
         <ul class="dialog-list">
           <li>O conteúdo é criptografado pelo WebRTC e segue diretamente entre os participantes.</li>
-          <li>Qualquer pessoa com o link pode assistir enquanto a transmissão estiver ativa.</li>
+          <li>O código curto facilita a entrada, mas é mais fácil de adivinhar do que o link completo. Compartilhe-o apenas com pessoas de confiança.</li>
+          <li>Qualquer pessoa com o link completo pode assistir enquanto a transmissão estiver ativa.</li>
           <li>O serviço público de sinalização apenas aproxima os navegadores; ele não recebe o vídeo.</li>
           <li>O LinkView não impõe um limite artificial de espectadores conectados.</li>
           <li>Cada espectador usa uma nova parcela do upload e do processamento do transmissor; para grandes audiências, use uma infraestrutura de streaming dedicada.</li>
